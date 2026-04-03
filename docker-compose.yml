@@ -1,0 +1,14 @@
+version: "3.9"
+
+services:
+  app:
+    build: .
+    container_name: salary-payment-generator
+    ports:
+      - "5001:5001"
+    volumes:
+      # Persist uploads, generated XMLs, accounts DB and history across restarts
+      - ./data:/app/data
+    environment:
+      - SECRET_KEY=change-me-in-production
+    restart: unless-stopped

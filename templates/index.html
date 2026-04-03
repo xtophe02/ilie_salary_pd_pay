@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+{% block title %}Upload Payroll – Salary Payment Generator{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-7">
+
+    <div class="card shadow-sm mb-4">
+      <div class="card-header d-flex align-items-center gap-2">
+        <i class="bi bi-upload"></i> Upload Monthly Payroll
+      </div>
+      <div class="card-body">
+        <form id="uploadForm" method="post" action="{{ url_for('upload') }}" enctype="multipart/form-data">
+
+          <!-- Drop zone -->
+          <div class="drop-zone mb-4" id="dropZone">
+            <i class="bi bi-file-earmark-excel d-block mb-2"></i>
+            <p class="mb-1 fw-semibold">Drag &amp; drop your Excel payroll file here</p>
+            <p class="text-muted small mb-3">or click to browse &mdash; .xlsx / .xls accepted</p>
+            <input type="file" id="fileInput" name="file" accept=".xlsx,.xls" class="d-none" required>
+            <button type="button" class="btn btn-outline-primary btn-sm" id="browseBtn">
+              <i class="bi bi-folder2-open me-1"></i>Browse file
+            </button>
+            <div id="fileLabel" class="mt-2 text-success fw-semibold small"></div>
+          </div>
+
+          <!-- Company details (collapsed by default) -->
+          <div class="mb-3">
+            <a class="text-decoration-none small" data-bs-toggle="collapse" href="#companyBlock">
+              <i class="bi bi-building me-1"></i>Company / Debtor settings
+              <i class="bi bi-chevron-down ms-1" style="font-size:.7rem"></i>
+            </a>
+          </div>
+          <div class="collapse mb-4" id="companyBlock">
+            <div class="border rounded p-3 bg-light">
+              <div class="mb-2">
+                <label class="form-label small fw-semibold mb-1">Company name</label>
+                <input type="text" name="company_name" class="form-control form-control-sm"
+                       value="{{ config.company_name }}">
+              </div>
+              <div class="mb-2">
+                <label class="form-label small fw-semibold mb-1">Debtor IBAN</label>
+                <input type="text" name="debtor_iban" class="form-control form-control-sm font-monospace"
+                       value="{{ config.debtor_iban }}">
+              </div>
+              <div>
+                <label class="form-label small fw-semibold mb-1">Debtor BIC</label>
+                <input type="text" name="debtor_bic" class="form-control form-control-sm font-monospace"
+                       value="{{ config.debtor_bic }}">
+              </div>
+            </div>
+          </div>
+
+          <div class="d-grid">
+            <button type="submit" class="btn btn-primary btn-lg" id="submitBtn" disabled>
+              <i class="bi bi-lightning-charge me-1"></i>Generate SEPA XMLs
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Info card -->
+    <div class="card shadow-sm">
+      <div class="card-header"><i class="bi bi-info-circle me-1"></i>How it works</div>
+      <div class="card-body small">
+        <ol class="mb-0 ps-3">
+          <li class="mb-1">Upload the monthly Excel payroll file (.xlsx).</li>
+          <li class="mb-1">The app reads <strong>salary</strong> and <strong>per-diem</strong> columns automatically.</li>
+          <li class="mb-1">IBANs from the file are saved to the bank-account database.
+              Missing IBANs are looked up from past uploads.</li>
+          <li class="mb-1">Two <strong>SEPA pain.001.001.03</strong> XML files are generated —
+              one for salaries and one for per-diem allowances.</li>
+          <li>The execution date is automatically set to the next <strong>TARGET2 business day</strong>.</li>
+        </ol>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const dropZone  = document.getElementById('dropZone');
+const fileInput = document.getElementById('fileInput');
+const browseBtn = document.getElementById('browseBtn');
+const fileLabel = document.getElementById('fileLabel');
+const submitBtn = document.getElementById('submitBtn');
+
+browseBtn.addEventListener('click', () => fileInput.click());
+dropZone.addEventListener('click', (e) => { if (e.target !== browseBtn) fileInput.click(); });
+
+fileInput.addEventListener('change', () => {
+  if (fileInput.files.length > 0) {
+    fileLabel.textContent = '✓ ' + fileInput.files[0].name;
+    submitBtn.disabled = false;
+  }
+});
+
+dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+dropZone.addEventListener('drop', (e) => {
+  e.preventDefault();
+  dropZone.classList.remove('drag-over');
+  const files = e.dataTransfer.files;
+  if (files.length > 0) {
+    fileInput.files = files;
+    fileLabel.textContent = '✓ ' + files[0].name;
+    submitBtn.disabled = false;
+  }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+{% block title %}Bank Accounts – Salary Payment Generator{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-lg-8">
+    <div class="card shadow-sm mb-4">
+      <div class="card-header d-flex align-items-center justify-content-between">
+        <span><i class="bi bi-bank me-1"></i>Stored Bank Accounts</span>
+        <span class="badge bg-secondary">{{ entries|length }}</span>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-sm table-hover mb-0 align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>Employee Name</th>
+              <th>IBAN</th>
+              <th>Source</th>
+              <th>Updated</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for e in entries %}
+            <tr>
+              <td class="fw-semibold">{{ e.name }}</td>
+              <td class="font-monospace small">{{ e.iban }}</td>
+              <td>
+                <span class="badge bg-light text-dark border small">{{ e.source }}</span>
+              </td>
+              <td class="text-muted small">{{ e.updated[:10] if e.updated else '—' }}</td>
+              <td class="text-end">
+                <!-- Edit button triggers modal -->
+                <button class="btn btn-outline-secondary btn-sm py-0"
+                        data-bs-toggle="modal"
+                        data-bs-target="#editModal"
+                        data-name="{{ e.name }}"
+                        data-iban="{{ e.iban }}">
+                  <i class="bi bi-pencil"></i>
+                </button>
+                <!-- Delete -->
+                <form method="post" action="{{ url_for('delete_account', name=e.name) }}"
+                      class="d-inline"
+                      onsubmit="return confirm('Delete account for {{ e.name }}?')">
+                  <button class="btn btn-outline-danger btn-sm py-0">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </form>
+              </td>
+            </tr>
+            {% else %}
+            <tr>
+              <td colspan="5" class="text-center text-muted py-4">
+                No accounts stored yet. Upload a payroll file to populate automatically.
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add new account -->
+  <div class="col-lg-4">
+    <div class="card shadow-sm">
+      <div class="card-header"><i class="bi bi-plus-circle me-1"></i>Add / Update Account</div>
+      <div class="card-body">
+        <form method="post" action="{{ url_for('add_account') }}">
+          <div class="mb-3">
+            <label class="form-label small fw-semibold">Employee Name (uppercase)</label>
+            <input type="text" name="name" class="form-control form-control-sm text-uppercase"
+                   placeholder="LAST FIRST" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label small fw-semibold">IBAN</label>
+            <input type="text" name="iban" class="form-control form-control-sm font-monospace text-uppercase"
+                   placeholder="DE00123..." required>
+          </div>
+          <button type="submit" class="btn btn-primary btn-sm w-100">
+            <i class="bi bi-save me-1"></i>Save
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Modal -->
+<div class="modal fade" id="editModal" tabindex="-1">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h6 class="modal-title">Edit IBAN</h6>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form id="editForm" method="post">
+        <div class="modal-body">
+          <p class="fw-semibold mb-2" id="editName"></p>
+          <input type="text" name="iban" id="editIban"
+                 class="form-control font-monospace text-uppercase" required>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary btn-sm">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('editModal').addEventListener('show.bs.modal', function(e) {
+  const btn = e.relatedTarget;
+  const name = btn.dataset.name;
+  const iban = btn.dataset.iban;
+  document.getElementById('editName').textContent = name;
+  document.getElementById('editIban').value = iban;
+  document.getElementById('editForm').action = '/accounts/edit/' + encodeURIComponent(name);
+});
+</script>
+{% endblock %}

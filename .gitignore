@@ -1,0 +1,27 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual Environments
+venv/
+env/
+ENV/
+
+# Data directory (contains REAL sensitive IBANs and config histories)
+data/
+
+# Upload / generated files
+*.xlsx
+*.xls
+~$*.xlsx
+*.xml
+*.json
+
+# macOS specific
+.DS_Store
+
+# IDEs and environments
+.vscode/
+.idea/
+*.env

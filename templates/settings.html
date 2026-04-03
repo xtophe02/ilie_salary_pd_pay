@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Settings – Salary Payment Generator{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-5">
+    <div class="card shadow-sm">
+      <div class="card-header"><i class="bi bi-gear me-1"></i>Company / Debtor Settings</div>
+      <div class="card-body">
+        <form method="post">
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Company name (Initiating Party)</label>
+            <input type="text" name="company_name" class="form-control"
+                   value="{{ config.company_name }}" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Debtor IBAN</label>
+            <input type="text" name="debtor_iban" class="form-control font-monospace text-uppercase"
+                   value="{{ config.debtor_iban }}" required>
+            <div class="form-text">Bank account from which payments are made.</div>
+          </div>
+          <div class="mb-4">
+            <label class="form-label fw-semibold">Debtor BIC</label>
+            <input type="text" name="debtor_bic" class="form-control font-monospace text-uppercase"
+                   value="{{ config.debtor_bic }}" required>
+            <div class="form-text">BIC of the debtor's bank.</div>
+          </div>
+          <button type="submit" class="btn btn-primary w-100">
+            <i class="bi bi-save me-1"></i>Save Settings
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

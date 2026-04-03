@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}Conversion History – Salary Payment Generator{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm">
+  <div class="card-header d-flex align-items-center justify-content-between">
+    <span><i class="bi bi-clock-history me-1"></i>Conversion History</span>
+    <span class="badge bg-secondary">{{ entries|length }}</span>
+  </div>
+  <div class="table-responsive">
+    <table class="table table-sm table-hover mb-0 align-middle">
+      <thead class="table-light">
+        <tr>
+          <th>Date</th>
+          <th>File</th>
+          <th>Period</th>
+          <th class="text-center">Salaries</th>
+          <th class="text-center">Per Diems</th>
+          <th class="text-center">Bonuses</th>
+          <th class="text-center">Missing</th>
+          <th colspan="3" class="text-center">Downloads</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for e in entries %}
+        <tr>
+          <td class="text-muted small">{{ e.timestamp[:16].replace('T', ' ') }}</td>
+          <td class="small">{{ e.original_filename }}</td>
+          <td class="fw-semibold">{{ "%02d"|format(e.month) }}/{{ e.year }}</td>
+          <td class="text-center">{{ e.salary_count }}</td>
+          <td class="text-center">{{ e.perdiem_count }}</td>
+          <td class="text-center">{{ e.get('bonus_count', 0) or '—' }}</td>
+          <td class="text-center">
+            {% if e.missing_count > 0 %}
+              <span class="badge bg-danger">{{ e.missing_count }}</span>
+            {% else %}
+              <span class="text-muted">—</span>
+            {% endif %}
+          </td>
+          <td class="text-center">
+            <a href="{{ url_for('download', filename=e.salary_xml) }}"
+               class="btn btn-outline-primary btn-sm py-0 px-2" title="{{ e.salary_xml }}">
+              <i class="bi bi-download me-1"></i>Salary
+            </a>
+          </td>
+          <td class="text-center">
+            <a href="{{ url_for('download', filename=e.perdiem_xml) }}"
+               class="btn btn-outline-success btn-sm py-0 px-2" title="{{ e.perdiem_xml }}">
+              <i class="bi bi-download me-1"></i>Per Diem
+            </a>
+          </td>
+          <td class="text-center">
+            {% if e.get('bonus_xml') %}
+            <a href="{{ url_for('download', filename=e.bonus_xml) }}"
+               class="btn btn-outline-warning btn-sm py-0 px-2" title="{{ e.bonus_xml }}">
+              <i class="bi bi-download me-1"></i>Bonus
+            </a>
+            {% else %}
+              <span class="text-muted">—</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="9" class="text-center text-muted py-4">
+            No conversions yet. Upload a payroll file to get started.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
